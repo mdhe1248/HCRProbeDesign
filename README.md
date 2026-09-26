@@ -14,6 +14,16 @@ Key tools:
 
 Documentation: https://www.gofflab.org/HCRProbeDesign/
 
+## GUI
+
+This fork adds a local Streamlit GUI as an alternative to the CLI tools above — paste, upload, or
+search NCBI for a target sequence by species/gene name; tune parameters with built-in explanations
+of what each one means and how it affects signal/specificity; and manage reference genomes
+(one-click prebuilt index, direct URL, or manual upload; plus rename/delete) without touching the
+command line.
+
+See [`gui/README.md`](gui/README.md) for setup and usage instructions.
+
 ## Installation
 ### Prerequisites
 - Python >= 3.6
