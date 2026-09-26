@@ -30,6 +30,12 @@ streamlit run gui/app.py
 
 See [`gui/README.md`](gui/README.md) for full setup and usage instructions.
 
+## Data directory
+
+HCRProbeDesign stores configuration and Bowtie2 indices in a persistent user data directory
+at `~/.hcrprobedesign/` so they survive package upgrades — the GUI reads and writes this same
+location. Override it with the `HCRPROBEDESIGN_DATA_DIR` environment variable.
+
 ## CLI tools
 
 This fork's `designProbes`, `designProbesBatch`, `buildGenomeIndex`, `fetchMouseIndex`, and
