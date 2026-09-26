@@ -5,6 +5,12 @@ for a single user — no auth, no deployment.
 
 ## Setup (one time)
 
+**Windows users:** this requires Linux or macOS — `bowtie2` and `pysam` don't support native
+Windows. Install [WSL2](https://learn.microsoft.com/windows/wsl/install) first, then run every
+command below inside that Linux environment exactly as written; the Streamlit UI is still
+reachable from your normal Windows browser at `localhost:8501` since WSL2 forwards that
+automatically.
+
 Clone the repo and run everything below from inside it:
 
 ```bash
