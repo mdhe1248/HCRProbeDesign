@@ -4,8 +4,8 @@ species: {}
 #     bowtie2_index: "indices/mm10/mm10"
 default_params:
   tileSize: 52
-  minGC: 45.0
-  maxGC: 55.0
+  minGC: 35.0
+  maxGC: 65.0
   targetGC: 50.0
   dTmMax: 5.0
   minGibbs: -70.0

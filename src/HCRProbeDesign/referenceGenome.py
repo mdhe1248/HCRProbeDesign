@@ -158,6 +158,83 @@ def register_species(config_path=None, species=None, index_prefix=None, force=Fa
     save_config(config, config_path)
 
 
+def _resolve_absolute_index_path(index_prefix):
+    """
+    Resolve an index prefix to an absolute path.
+
+    :param index_prefix: Bowtie2 index prefix (relative or absolute).
+    :return: Absolute path to the index prefix.
+    """
+    if os.path.isabs(index_prefix):
+        return index_prefix
+    return os.path.join(get_data_dir(), index_prefix)
+
+
+def rename_species(old_name, new_name, config_path=None, force=False):
+    """
+    Rename a registered species in the config file.
+
+    Only updates the config key; does not move or rename any index files on disk.
+
+    :param old_name: Currently registered species key.
+    :param new_name: New species key.
+    :param config_path: Path to HCRconfig.yaml (default: user data dir).
+    :param force: Overwrite new_name's existing entry if True.
+    :return: None.
+    :raises ValueError: If old_name isn't registered, or new_name exists and force is False.
+    """
+    if config_path is None:
+        ensure_data_dir()
+        config_path = get_config_path()
+    config = load_config(config_path)
+    species_config = config.get("species", {}) or {}
+    if old_name not in species_config:
+        raise ValueError(f"Species '{old_name}' is not registered.")
+    if new_name in species_config and not force:
+        raise ValueError(f"Species '{new_name}' already exists. Use force=True to overwrite.")
+    species_config[new_name] = species_config.pop(old_name)
+    save_config(config, config_path)
+
+
+def delete_species(name, config_path=None, delete_files=False):
+    """
+    Unregister a species, optionally deleting its index files from disk.
+
+    Index files are only deleted if they live inside the managed indices
+    directory (i.e. were created via build_bowtie2_index/fetch_prebuilt_index),
+    to avoid removing a directory the user pointed at explicitly with --index.
+
+    :param name: Registered species key to remove.
+    :param config_path: Path to HCRconfig.yaml (default: user data dir).
+    :param delete_files: Also delete the index directory on disk if True.
+    :return: The deleted directory path if files were removed, else None.
+    :raises ValueError: If name isn't registered.
+    """
+    if config_path is None:
+        ensure_data_dir()
+        config_path = get_config_path()
+    config = load_config(config_path)
+    species_config = config.get("species", {}) or {}
+    if name not in species_config:
+        raise ValueError(f"Species '{name}' is not registered.")
+
+    index_prefix = species_config[name].get("bowtie2_index", "")
+    abs_prefix = _resolve_absolute_index_path(index_prefix) if index_prefix else None
+
+    del species_config[name]
+    save_config(config, config_path)
+
+    if not delete_files or not abs_prefix:
+        return None
+
+    species_dir = os.path.dirname(abs_prefix)
+    indices_root = os.path.abspath(get_indices_dir())
+    if os.path.isdir(species_dir) and os.path.commonpath([os.path.abspath(species_dir), indices_root]) == indices_root:
+        shutil.rmtree(species_dir)
+        return species_dir
+    return None
+
+
 def main():
     """CLI entry point for building and registering a reference genome index."""
     parser = argparse.ArgumentParser(
