@@ -22,7 +22,13 @@ of what each one means and how it affects signal/specificity; and manage referen
 (one-click prebuilt index, direct URL, or manual upload; plus rename/delete) without touching the
 command line.
 
-See [`gui/README.md`](gui/README.md) for setup and usage instructions.
+Quick start (once the `hcrprobedesign` conda environment is set up):
+```bash
+conda activate hcrprobedesign
+streamlit run gui/app.py
+```
+
+See [`gui/README.md`](gui/README.md) for full setup and usage instructions.
 
 ## Installation
 ### Prerequisites
