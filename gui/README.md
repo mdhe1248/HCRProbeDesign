@@ -5,14 +5,21 @@ for a single user — no auth, no deployment.
 
 ## Setup (one time)
 
+Clone the repo and run everything below from inside it:
+
+```bash
+git clone https://github.com/mdhe1248/HCRProbeDesign.git
+cd HCRProbeDesign
+```
+
 The package's own `environment.yaml` is outdated (Python 3.7 / macOS bowtie2 build
 from 2021) and won't work here. Create a fresh conda environment instead:
 
 ```bash
 conda create -n hcrprobedesign python=3.11 -y
 conda install -n hcrprobedesign -c bioconda -c conda-forge bowtie2 -y
-conda run -n hcrprobedesign pip install -e /mnt/data/repos/HCRProbeDesign
-conda run -n hcrprobedesign pip install -r /mnt/data/repos/HCRProbeDesign/gui/requirements.txt
+conda run -n hcrprobedesign pip install -e .
+conda run -n hcrprobedesign pip install -r gui/requirements.txt
 ```
 
 Verify:
@@ -24,9 +31,11 @@ conda run -n hcrprobedesign which bowtie2 bowtie2-build
 
 ## Run
 
+From inside the cloned repo directory:
+
 ```bash
 conda activate hcrprobedesign
-streamlit run /mnt/data/repos/HCRProbeDesign/gui/app.py
+streamlit run gui/app.py
 ```
 
 Opens at `http://localhost:8501`.
