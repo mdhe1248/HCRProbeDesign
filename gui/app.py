@@ -38,7 +38,7 @@ input_mode = st.radio("Target sequence source", ["Paste or upload FASTA", "Searc
 if input_mode == "Search by gene name":
     ncbi_email = st.text_input(
         "NCBI contact email (required by NCBI to use gene search)",
-        value="leed2@hhmi.org",
+        value="",
         key="ncbi_email",
     )
     geneFetch.configure_entrez(ncbi_email)
