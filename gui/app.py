@@ -480,6 +480,7 @@ if run_clicked:
         else:
             st.session_state["best_tiles"] = best_tiles
             st.session_state["target_name"] = target_name
+            st.session_state["max_probes_requested"] = int(max_probes)
 
 # ---------------------------------------------------------------------------
 # 4. Results
@@ -494,6 +495,14 @@ if "best_tiles" in st.session_state:
     probeDesign.outputTable(best_tiles, outHandle=table_handle)
     results_df = pd.read_csv(io.StringIO(table_handle.getvalue()), sep="\t")
     st.dataframe(results_df, use_container_width=True)
+
+    requested_probes = st.session_state.get("max_probes_requested", len(best_tiles))
+    if len(best_tiles) < requested_probes:
+        st.info(
+            f"Found {len(best_tiles)} of the {requested_probes} probes requested. To find more: "
+            "widen GC%/Gibbs FE ranges, loosen homopolymer limits, or relax genome masking "
+            "(uncheck it or raise \"Max allowed genomic hits\")."
+        )
 
     # Use the channel actually baked into the designed tiles (not the current sidebar widget
     # value, which may have changed since this design was run) for a correct pool name.
