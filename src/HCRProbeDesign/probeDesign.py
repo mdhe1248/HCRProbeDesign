@@ -92,10 +92,16 @@ def write_idt_opool_xlsx(tiles, pool_name, outHandle):
 	Write probe halves as an IDT oPools-compatible .xlsx workbook.
 
 	Unlike outputTable/outputIDT (text-mode, tab-separated), this writes real
-	binary xlsx content matching IDT's oPools order template exactly: a
-	"Pool name"/"Sequence" header, one row per oligo half (P1 then P2 per
-	tile), with pool_name repeated on every row. IDT's oPools order page only
-	accepts .xlsx/.xls uploads, not CSV/TSV.
+	binary xlsx content. The first two columns, "Pool name" and "Sequence",
+	match IDT's oPools order template exactly -- one row per oligo half (P1
+	then P2 per tile), with pool_name repeated on every row. IDT's oPools
+	order page only accepts .xlsx/.xls uploads, not CSV/TSV. Additional
+	reference columns (binding site name, which half, channel, GC/Tm/dTm/
+	GibbsFE) are appended after those two for the user's own reference --
+	confirmed by direct upload testing that IDT's oPools parser tolerates
+	extra columns fine (a separate second worksheet was also tried and did
+	not work, so reference info is appended as columns on the same sheet
+	instead).
 
 	:param tiles: a list of Tile objects.
 	:param pool_name: name repeated in the "Pool name" column for every row.
@@ -105,11 +111,17 @@ def write_idt_opool_xlsx(tiles, pool_name, outHandle):
 
 	workbook = openpyxl.Workbook()
 	sheet = workbook.active
-	sheet.append(["Pool name", "Sequence"])
+	sheet.append(["Pool name", "Sequence", "Binding site", "Half", "Channel", "GC", "Tm", "dTm", "GibbsFE"])
 	for tile in tiles:
-		sheet.append([pool_name, tile.P1])
+		sheet.append([
+			pool_name, tile.P1, tile.name, "P1 (odd)", tile.channel,
+			round(tile.GC(), 2), round(primer3.calc_tm(tile.sequence), 2), round(tile.dTm, 2), round(tile.Gibbs, 2),
+		])
 	for tile in tiles:
-		sheet.append([pool_name, tile.P2])
+		sheet.append([
+			pool_name, tile.P2, tile.name, "P2 (even)", tile.channel,
+			round(tile.GC(), 2), round(primer3.calc_tm(tile.sequence), 2), round(tile.dTm, 2), round(tile.Gibbs, 2),
+		])
 	workbook.save(outHandle)
 
 
