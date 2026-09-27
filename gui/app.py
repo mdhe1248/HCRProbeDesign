@@ -529,9 +529,8 @@ if "best_tiles" in st.session_state:
     st.subheader("Order this pool")
     st.link_button("Order this pool at IDT oPools →", "https://www.idtdna.com/site/order/poolentry/")
     st.caption(
-        f"Enter **{pool_name}** as the pool name and paste in the sequences from the "
-        f"downloaded .xlsx above (or upload it directly — IDT oPools only accepts .xlsx/.xls, "
-        f"not CSV/TSV). Available synthesis scales: 1, 10, or 50 pmol/oligo.\n\n"
+        f"Download the .xlsx file above and upload it in IDT's oPools Oligo Pools Entry page. "
+        f"Available synthesis scales: 1, 10, or 50 pmol/oligo.\n\n"
         f"**Example resuspension → dilution** (10 pmol/oligo scale, this pool's {len(best_tiles)} "
         f"probe pairs = {n_oligos} oligos; shown for illustration, not a mandatory protocol):\n"
         f"1. Total oligo ordered: {n_oligos} oligos × 10 pmol = {total_pmol_10:.0f} pmol\n"
