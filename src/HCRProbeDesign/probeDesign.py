@@ -85,8 +85,34 @@ def outputIDT(tiles,outHandle=sys.stdout):
 	
 	for oligo in even:
 		outHandle.write(f"{oligo[0]}\t{oligo[1]}\n")
-		
-		
+
+
+def write_idt_opool_xlsx(tiles, pool_name, outHandle):
+	"""
+	Write probe halves as an IDT oPools-compatible .xlsx workbook.
+
+	Unlike outputTable/outputIDT (text-mode, tab-separated), this writes real
+	binary xlsx content matching IDT's oPools order template exactly: a
+	"Pool name"/"Sequence" header, one row per oligo half (P1 then P2 per
+	tile), with pool_name repeated on every row. IDT's oPools order page only
+	accepts .xlsx/.xls uploads, not CSV/TSV.
+
+	:param tiles: a list of Tile objects.
+	:param pool_name: name repeated in the "Pool name" column for every row.
+	:param outHandle: binary file-like object (e.g. io.BytesIO()) to save the workbook to.
+	"""
+	import openpyxl
+
+	workbook = openpyxl.Workbook()
+	sheet = workbook.active
+	sheet.append(["Pool name", "Sequence"])
+	for tile in tiles:
+		sheet.append([pool_name, tile.P1])
+	for tile in tiles:
+		sheet.append([pool_name, tile.P2])
+	workbook.save(outHandle)
+
+
 #
 # def alignOutput(inseq,tiles):
 #     """Uses tile information to make a nice output w/ probes aligned to inseq

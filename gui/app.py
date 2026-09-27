@@ -495,10 +495,14 @@ if "best_tiles" in st.session_state:
     results_df = pd.read_csv(io.StringIO(table_handle.getvalue()), sep="\t")
     st.dataframe(results_df, use_container_width=True)
 
-    idt_handle = io.StringIO()
-    probeDesign.outputIDT(best_tiles, outHandle=idt_handle)
+    # Use the channel actually baked into the designed tiles (not the current sidebar widget
+    # value, which may have changed since this design was run) for a correct pool name.
+    pool_name = f"{result_target_name}_{best_tiles[0].channel}_pool"
 
-    col1, col2, col3 = st.columns(3)
+    idt_buffer = io.BytesIO()
+    probeDesign.write_idt_opool_xlsx(best_tiles, pool_name, idt_buffer)
+
+    col1, col2 = st.columns(2)
     with col1:
         st.download_button(
             "Download probes.tsv",
@@ -508,13 +512,41 @@ if "best_tiles" in st.session_state:
         )
     with col2:
         st.download_button(
-            "Download IDT order sheet",
-            data=idt_handle.getvalue(),
-            file_name=f"{result_target_name}_IDT.tsv",
-            mime="text/tab-separated-values",
+            "Download IDT oPools order sheet (.xlsx)",
+            data=idt_buffer.getvalue(),
+            file_name=f"{pool_name}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-    with col3:
-        st.metric("Estimated synthesis cost", f"${probeDesign.calcOligoCost(best_tiles):.2f}")
+
+    n_oligos = 2 * len(best_tiles)
+    total_pmol_10 = n_oligos * 10
+    stock_uM = 4.0
+    resuspend_uL = total_pmol_10 / stock_uM
+    working_nM = 4.0
+    hyb_vol_uL = 500.0
+    dilution_uL = (working_nM / 1000 * hyb_vol_uL) / stock_uM
+
+    st.subheader("Order this pool")
+    st.link_button("Order this pool at IDT oPools →", "https://www.idtdna.com/site/order/poolentry/")
+    st.caption(
+        f"Enter **{pool_name}** as the pool name and paste in the sequences from the "
+        f"downloaded .xlsx above (or upload it directly — IDT oPools only accepts .xlsx/.xls, "
+        f"not CSV/TSV). Available synthesis scales: 1, 10, or 50 pmol/oligo.\n\n"
+        f"**Example resuspension → dilution** (10 pmol/oligo scale, this pool's {len(best_tiles)} "
+        f"probe pairs = {n_oligos} oligos; shown for illustration, not a mandatory protocol):\n"
+        f"1. Total oligo ordered: {n_oligos} oligos × 10 pmol = {total_pmol_10:.0f} pmol\n"
+        f"2. Resuspend to a **{stock_uM:.0f} µM stock**: {total_pmol_10:.0f} pmol ÷ {stock_uM:.0f} µM = "
+        f"**{resuspend_uL:.0f} µL** of nuclease-free water or IDTE buffer (IDTE recommended for "
+        f"longer-term storage; conventional HCR protocols typically use a 1 µM stock instead — "
+        f"ours is 4× more concentrated, using less resuspension volume and lasting longer)\n"
+        f"3. Dilute for routine use to the standard **{working_nM:.0f} nM working concentration** "
+        f"(for a typical {hyb_vol_uL:.0f} µL hybridization volume): {working_nM:.0f} nM × "
+        f"{hyb_vol_uL:.0f} µL ÷ {stock_uM:.0f} µM = **{dilution_uL:.2g} µL** of stock added to "
+        f"~{hyb_vol_uL:.0f} µL of hybridization buffer (a conventional 1 µM stock would need "
+        f"{dilution_uL * stock_uM:.2g} µL instead for the same dose — if that's too small a volume "
+        f"to pipette accurately, pre-dilute the stock 1:10 first).\n\n"
+        f"Ordered a different scale (1 or 50 pmol/oligo)? Multiply step 1 by that number instead of 10."
+    )
 
 # ---------------------------------------------------------------------------
 # 5. Species registration (advanced, infrequent)

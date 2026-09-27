@@ -57,8 +57,12 @@ Opens at `http://localhost:8501`.
      NCBI contact email (prefilled, editable) and internet access.
 2. Adjust parameters in the sidebar (channel, tile size, GC/Gibbs/dTm ranges,
    homopolymer limits, max probes, genome off-target masking).
-3. Click **Design probes**. Results appear as a table with download buttons for
-   the probe TSV and an IDT ordering sheet.
+3. Click **Design probes**. Results appear as a table with a download button for
+   the probe TSV and another for an IDT oPools-ready order sheet (`.xlsx`, with
+   "Pool name"/"Sequence" columns matching IDT's real upload template — IDT
+   oPools only accepts .xlsx/.xls, not CSV/TSV). Below that, a link to IDT's
+   oPools order page plus an example resuspension/dilution calculation (not a
+   mandatory protocol, just a starting point).
 4. To design against a species other than what's already registered, use the
    **Register a new reference genome** panel at the bottom. Three ways to add one
    (all a one-time step per species, not part of routine probe design):
