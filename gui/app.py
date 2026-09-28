@@ -115,7 +115,10 @@ if input_mode == "Search by gene name":
                 except Exception as exc:
                     st.error(f"Could not fetch sequence: {exc}")
 
-uploaded_file = st.file_uploader("Upload a FASTA file", type=["fa", "fasta", "txt"])
+if input_mode == "Paste or upload FASTA":
+    uploaded_file = st.file_uploader("Upload a FASTA file", type=["fa", "fasta", "txt"])
+else:
+    uploaded_file = None
 pasted_fasta = st.text_area(
     "...or paste FASTA text",
     height=150,
