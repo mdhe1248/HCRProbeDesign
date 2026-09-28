@@ -128,6 +128,12 @@ pasted_fasta = st.text_area(
 )
 fasta_text = uploaded_file.getvalue().decode("utf-8") if uploaded_file is not None else pasted_fasta
 
+target_name = st.text_input(
+    "Target name (used for output file naming)",
+    value="target",
+    help="Used to name the downloaded TSV/IDT files and internal scratch files for this run — doesn't affect probe design itself.",
+)
+
 # ---------------------------------------------------------------------------
 # 2. Parameters
 # ---------------------------------------------------------------------------
@@ -381,12 +387,6 @@ if genome_mask_on:
             "some cross-reactivity with that paralogous locus."
         ),
     )
-
-target_name = st.sidebar.text_input(
-    "Target name (used for output file naming)",
-    value="target",
-    help="Used to name the downloaded TSV/IDT files and internal scratch files for this run — doesn't affect probe design itself.",
-)
 
 # ---------------------------------------------------------------------------
 # 3. Run
