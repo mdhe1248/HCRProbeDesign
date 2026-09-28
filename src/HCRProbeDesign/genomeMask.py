@@ -108,7 +108,7 @@ def _resolve_index(species, index):
     return species_config[species]["bowtie2_index"]
 
 #TODO: make genomemask() take transient index argment if not default in species
-def genomemask(fasta_string,handleName="tmp",species="mouse",nAlignments = 3, index=None):
+def genomemask(fasta_string,handleName="tmp",species="mouse",nAlignments = 3, index=None, workdir=None):
     """
     Run Bowtie2 to align probe tiles and write a SAM file to disk.
 
@@ -117,14 +117,22 @@ def genomemask(fasta_string,handleName="tmp",species="mouse",nAlignments = 3, in
     :param species: Species key in HCRconfig.yaml.
     :param nAlignments: Number of alignments to report per read.
     :param index: Optional Bowtie2 index prefix override.
+    :param workdir: Optional directory to write the scratch FASTA/SAM files
+        into. Defaults to the current working directory when omitted, but
+        callers running concurrently in a shared process (e.g. a multi-user
+        server) should pass an absolute, job-specific directory instead of
+        relying on ``os.chdir``, since the CWD is process-wide, not per-job.
     :return: Bowtie2 subprocess return code.
     """
     fasta_file = f'{handleName}_reads.fa'
+    sam_file = f'{handleName}.sam'
+    if workdir:
+        fasta_file = os.path.join(workdir, fasta_file)
+        sam_file = os.path.join(workdir, sam_file)
     tmpFasta = open(fasta_file,mode="w")
     #print(tmpFasta.name)
     tmpFasta.write(fasta_string)
     tmpFasta.close()
-    sam_file = f'{handleName}.sam'
     index = _resolve_index(species, index)
     print(index)
     if os.path.isabs(index):

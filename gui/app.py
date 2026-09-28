@@ -459,16 +459,15 @@ if run_clicked:
     with st.spinner("Designing probes..."):
         try:
             with tempfile.TemporaryDirectory() as tmpdir:
-                previous_cwd = os.getcwd()
-                os.chdir(tmpdir)
-                try:
-                    # _design_tiles_for_record is the pipeline's real integration point;
-                    # it writes genome-masking scratch files into the CWD, hence the chdir.
-                    best_tiles = probeDesign._design_tiles_for_record(
-                        args, record, target_name, channel_override
-                    )
-                finally:
-                    os.chdir(previous_cwd)
+                # Pass tmpdir explicitly as workdir rather than os.chdir()'ing
+                # into it: this app process is shared by every connected user
+                # (Streamlit runs one session per thread, not per process), so
+                # os.chdir affects every concurrent session's CWD, not just
+                # this one. Two overlapping design jobs used to be able to
+                # race and read/write each other's scratch files.
+                best_tiles = probeDesign._design_tiles_for_record(
+                    args, record, target_name, channel_override, workdir=tmpdir
+                )
         except ValueError as exc:
             st.error(f"Input error: {exc}")
         except SystemExit as exc:

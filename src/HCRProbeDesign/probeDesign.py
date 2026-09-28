@@ -280,7 +280,7 @@ def _build_target_name(base_name, record_name, index, used_names):
 	return candidate
 
 
-def _design_tiles_for_record(args, record, target_name, channel_override=None):
+def _design_tiles_for_record(args, record, target_name, channel_override=None, workdir=None):
 	"""
 	Run the full probe design workflow for a single FASTA record.
 
@@ -288,6 +288,12 @@ def _design_tiles_for_record(args, record, target_name, channel_override=None):
 	:param record: Dict containing "name" and "sequence".
 	:param target_name: Output name prefix for files and tiles.
 	:param channel_override: Optional channel override.
+	:param workdir: Optional absolute directory for genome-masking scratch
+		files (the Bowtie2 FASTA/SAM output). Defaults to the current working
+		directory when omitted, which is fine for a one-shot CLI process but
+		unsafe for a long-running, multi-user server, since callers running
+		concurrently in the same process must not rely on a shared,
+		process-wide CWD (see genomeMask.genomemask).
 	:return: List of selected Tile objects.
 	"""
 	sequence = record["sequence"]
@@ -347,9 +353,10 @@ def _design_tiles_for_record(args, record, target_name, channel_override=None):
 	if args.no_genomemask:
 		utils.eprint(f"\nChecking unique mapping of remaining tiles against {args.species} reference genome")
 		blast_string = "\n".join([tile.toFasta() for tile in tiles])
-		blast_res = genomeMask.genomemask(blast_string, handleName=handle_name,species=args.species,index=args.index)
+		blast_res = genomeMask.genomemask(blast_string, handleName=handle_name,species=args.species,index=args.index,workdir=workdir)
 		utils.eprint(f'Parsing bowtie2 output now')
-		hitCounts = genomeMask.countHitsFromSam(f'{handle_name}.sam')
+		sam_file = os.path.join(workdir, f'{handle_name}.sam') if workdir else f'{handle_name}.sam'
+		hitCounts = genomeMask.countHitsFromSam(sam_file)
 		#print(hitCounts)
 		#Check that keys returned from hitCounts match order of tiles in tiles
 		assert all(map(lambda x, y: x == y, [k for k in hitCounts.keys()], [tile.name for tile in tiles]))
